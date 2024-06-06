@@ -1,47 +1,37 @@
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import axios from 'axios';
+import { useForm } from '@inertiajs/react';
 
 const TodoForm = ({ setTodos }) => {
-    const [task, setTask] = useState('');
-    const [errors, setErrors] = useState({});
-    const [processing, setProcessing] = useState(false);
+    const { data, setData, post, processing, errors } = useForm({
+        task: '',
+    });
 
-    const handleTaskChange = (event) => {
-        setTask(event.target.value);
-    };
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
+    const handleSubmit = (e) => {
+        e.preventDefault();
         createTodo();
     };
 
     const createTodo = async () => {
-        if (!task.trim()) {
-            setErrors({ task: 'Task cannot be empty' });
+        if (!data.task.trim()) {
+            setData('errors', { task: 'Task cannot be empty' });
             return;
         }
 
-        setProcessing(true);
-
         try {
-            const response = await axios.post('/todos', { task });
-            if (response.data && response.data.todos) {
-                setTodos(response.data.todos);
-                setTask('');
-                setErrors({});
+            const response = await post('/todos', data);
+            if (response && response.todos) {
+                setTodos(response.todos);
+                setData('task', '');
+                setData('errors', {});
             } else {
-                setErrors({ task: 'Unexpected response structure' });
+                setData('errors', { task: 'Unexpected response structure' });
             }
         } catch (error) {
             console.error('Error adding todo:', error);
             if (error.response) {
-                setErrors({ task: `Failed to add todo: ${error.response.data.message || 'Unknown error'}` });
+                setData('errors', { task: `Failed to add todo: ${error.response.data.message || 'Unknown error'}` });
             } else {
-                setErrors({ task: 'Failed to add todo: Network error' });
+                setData('errors', { task: 'Failed to add todo: Network error' });
             }
-        } finally {
-            setProcessing(false);
         }
     };
 
@@ -52,8 +42,8 @@ const TodoForm = ({ setTodos }) => {
                     className="block px-2 py-1.5 bg-gray-100 rounded w-full"
                     placeholder="Enter your task..."
                     type="text"
-                    value={task}
-                    onChange={handleTaskChange}
+                    value={data.task}
+                    onChange={(e) => setData('task', e.target.value)}
                 />
                 {errors.task && <small className="text-red-500 mt-2 block">{errors.task}</small>}
             </div>
@@ -68,10 +58,6 @@ const TodoForm = ({ setTodos }) => {
             </div>
         </form>
     );
-};
-
-TodoForm.propTypes = {
-    setTodos: PropTypes.func.isRequired,
 };
 
 export default TodoForm;
