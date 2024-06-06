@@ -1,16 +1,14 @@
-// Todo.jsx
-import React from 'react';
-import PropTypes from 'prop-types';
-import axios from 'axios';
+import { useForm } from '@inertiajs/react';
 
-const Todo = ({ todo, setTodos }) => {
+const Todo = ({ todo }) => {
+    const { delete: destroy } = useForm();
+
     const handleCheckboxChange = async () => {
-        // Update the todo as done
         try {
-            await axios.put(`/todos/${todo.id}`, { is_done: !todo.is_done });
-            setTodos(prevTodos =>
-                prevTodos.map(item => (item.id === todo.id ? { ...item, is_done: !item.is_done } : item))
-            );
+            await destroy(`/todos/${todo.id}`, {
+                method: 'put',
+                data: { is_done: !todo.is_done }
+            });
         } catch (error) {
             console.error('Failed to update todo:', error);
         }
@@ -19,8 +17,7 @@ const Todo = ({ todo, setTodos }) => {
     const handleDeleteClick = async () => {
         // Delete the todo
         try {
-            await axios.delete(`/todos/${todo.id}`);
-            setTodos(prevTodos => prevTodos.filter(item => item.id !== todo.id));
+            await destroy(`/todos/${todo.id}`);
         } catch (error) {
             console.error('Failed to delete todo:', error);
         }
@@ -39,15 +36,6 @@ const Todo = ({ todo, setTodos }) => {
             </button>
         </div>
     );
-};
-
-Todo.propTypes = {
-    todo: PropTypes.shape({
-        id: PropTypes.number.isRequired,
-        task: PropTypes.string.isRequired,
-        is_done: PropTypes.bool.isRequired,
-    }).isRequired,
-    setTodos: PropTypes.func.isRequired,
 };
 
 export default Todo;
