@@ -19,7 +19,7 @@ class TodoController extends Controller
 
     public function create()
     {
-        return Inertia::render('Home');
+        return Inertia::render('Todo/Create');
     }
 
     public function store(TodoStoreRequest $request)
@@ -31,32 +31,19 @@ class TodoController extends Controller
         return Redirect::route('todos.index');
     }
 
-    public function show(string $id)
-    {
-        //
-    }
-
-    public function edit(string $id)
-    {
-        //
-    }
-
     public function update(Request $request, Todo $todo)
     {
         $todo->update([
             'is_done' => $request->boolean('is_done'),
         ]);
 
-        return redirect()->to('todos.index');
+        return redirect()->route('todos.index');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Todo $todo)
     {
         $todo->delete();
     
-        return redirect()->to('todos.index');
+        return redirect()->route('todos.index');
     }
 }
